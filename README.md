@@ -1,5 +1,12 @@
-# Networked-Aframe Starter Pack
+# My Metaverse
 
-Built with [Networked-A-Frame](https://github.com/haydenjameslee/networked-aframe), a web framework for building multi-user virtual reality experiences. Works on Vive, Rift, desktop, mobile platforms.
+A minimum viable Metaverse Site, with rigged Avatars.
 
-Click and drag on desktop. Open it on a smartphone and use the device motion sensors. Or [plug in a VR headset](https://webvr.rocks)!
+It's built with:
+* AFrame/THREE.js for the rendering
+* Networked AFrame for voice and syncing
+* handy-work for Hand Interactions
+
+## Todo:
+
+* Add an example of navigation
