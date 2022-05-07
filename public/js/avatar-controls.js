@@ -252,7 +252,7 @@ avatarStuff:
       const pp = p.parent;
       const o = this.el.object3D;
       pp.getWorldQuaternion(tempQuaternionA).invert();
-      o.getWorldQuaternion(p.quaternion).multiply(tempQuaternionA);
+      o.getWorldQuaternion(p.quaternion).premultiply(tempQuaternionA);
 
       if (this.data.yAxis) {
         tempVector3.set(0,1,0).applyQuaternion(o.quaternion);

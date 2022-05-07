@@ -2,56 +2,25 @@
   <head>
     <meta charset="utf-8" />
     <title>Basic Example — Networked-Aframe</title>
+    <script>
+      // WebXR requires https: to work so ensure redirected if needed.
+      if (location.hostname !== 'localhost' && window.location.protocol === 'http:') window.location.protocol = 'https:';
+    </script>
     <meta name="description" content="Basic Example — Networked-Aframe" />
 
     <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@0d23f9b21c33ab6821046ce95835492cb84996c5/dist/aframe-master.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.slim.js"></script>
     <script src="/easyrtc/easyrtc.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/networked-aframe@^0.9.1/dist/networked-aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/handy-work@3.1.5/build/handy-controls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/handy-work@3.1.5/build/magnet-helpers.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-blink-controls/dist/aframe-blink-controls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/networked-aframe@^0.9.1/dist/networked-aframe.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AdaRoseCannon/aframe-blink-controls@main/dist/aframe-blink-controls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handy-work@3.1.6/build/handy-controls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handy-work@3.1.6/build/magnet-helpers.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AdaRoseCannon/aframe-xr-boilerplate@glitch/simple-navmesh-constraint.js"></script>
     <script src="/js/spawn-in-circle.component.js"></script>
     <script src="/js/avatar-controls.js"></script>
     <script src="/js/networked-toggle.js"></script>
-    <script>
-
-        NAF.schemas.getComponentsOriginal = NAF.schemas.getComponents;
-        NAF.schemas.getComponents = (template) => {
-          if (!NAF.schemas.hasTemplate("#rig-template")) {
-            NAF.schemas.add({
-              template: '#rig-template',
-              components: [
-                {selector: '.avatar-head', component: 'position'},
-                {selector: '.avatar-head', component: 'rotation'},
-                {selector: '.avatar-hand-left', component: 'position'},
-                {selector: '.avatar-hand-left', component: 'rotation'},
-                {selector: '.avatar-hand-right', component: 'position'},
-                {selector: '.avatar-hand-right', component: 'rotation'},
-                {component: 'update-gltf-model', property: 'src'},
-                'player-info', 'position', 'rotation',
-              ]
-            });
-          }
-          
-          if (!NAF.schemas.hasTemplate("#head-template")) {
-            NAF.schemas.add({
-              template: '#head-template',
-              components: [
-                {selector: '.avatar-head', component: 'position'},
-                {selector: '.avatar-head', component: 'rotation'},
-                {selector: '.head-model', component: 'update-gltf-model', property: 'src'},
-                'player-info', 'position', 'rotation'
-              ]
-            });
-          }
-
-          const components = NAF.schemas.getComponentsOriginal(template);
-          return components;
-        }
-    </script>
+    <script src="/js/naf-setup.js"></script>
     <style>
       #dom-overlay {
         font-family: Sans-Serif;
@@ -71,14 +40,14 @@
       renderer="alpha:true;physicallyCorrectLights:true;colorManagement:true;exposure:1;toneMapping:ACESFilmic;"
       gltf-model="dracoDecoderPath: https://cdn.jsdelivr.net/npm/three@0.129.0/examples/js/libs/draco/gltf/;"
       shadow="type: pcfsoft"
-      networked-scene="room: basic;debug: true; adapter: easyrtc; audio: true;"
+      networked-scene="room:basic;debug:true; adapter:easyrtc; audio: true;"
     >
       <a-assets>
-        <a-mixin id="blink" blink-controls="cameraRig: #cameraRig; teleportOrigin: #head; collisionEntities:.navmesh;"></a-mixin>
+        <img id="tile" src="https://cdn.glitch.global/3129b919-8546-449a-a304-772226cd55f1/interlaced.png?v=1650946604470">
+        <a-mixin id="blink" blink-controls="rotateOnTeleport:false;cameraRig: #cameraRig; teleportOrigin: #head; collisionEntities:.navmesh;"></a-mixin>
         <a-asset-item id="avatar-a-gltf" src="https://cdn.glitch.global/d29f98b4-ddd1-4589-8b66-e2446690e697/box%20avatar.glb?v=1650206664387"></a-asset-item>
         <a-asset-item id="avatar-b-gltf" src="https://cdn.glitch.global/d29f98b4-ddd1-4589-8b66-e2446690e697/The-observer.glb?v=1650296105832"></a-asset-item>
         <a-asset-item id="head-avatar-a-gltf" src="https://cdn.glitch.global/3129b919-8546-449a-a304-772226cd55f1/Television_01_1k-v1.glb?v=1650548248628"></a-asset-item>
-<!--         <a-asset-item id="head-avatar-b-gltf" src="https://cdn.glitch.global/3129b919-8546-449a-a304-772226cd55f1/marble_bust_01_1k-v1.glb?v=1650557312731"></a-asset-item> -->
 
         <template id="rig-template">
           <a-gltf-model shadow
@@ -88,7 +57,7 @@
             elbow__right="shoulder:part__upper_armR;hand:part__handR;elbow:part__forearmR;bias:0.02 -0.1 0;"
             elbow__left="shoulder:part__upper_armL;hand:part__handL;elbow:part__forearmL;bias:-0.02 -0.1 0;"
           >
-            <a-entity class="avatar-head" control-part="part:face"></a-entity>
+            <a-entity class="avatar-head" control-part="part:face" networked-audio-source></a-entity>
             <a-entity class="avatar-hand-left" control-part="part:gripL;"></a-entity>
             <a-entity class="avatar-hand-right" control-part="part:gripR;"></a-entity>
           </a-gltf-model>
@@ -96,7 +65,7 @@
 
         <template id="head-template">
           <a-entity>
-            <a-entity class="avatar-head">
+            <a-entity class="avatar-head" networked-audio-source>
               <a-gltf-model shadow class="head-model" rotation="0 180 0" position="0 -0.2 0" scale="0.8 0.8 0.8" src="#head-avatar-a-gltf" update-gltf-model="sync:true"></a-gltf-model>
             </a-entity>
           </a-entity>
@@ -107,8 +76,8 @@
         id="cameraRig"
         spawn-in-circle="radius:3"
         networked-hand-toggle
-        data-networked-hands="template:#rig-template;attachTemplateToLocal:false;"
         data-networked-no-hands="template:#head-template;attachTemplateToLocal:false;"
+        data-networked-hands="template:#rig-template;attachTemplateToLocal:false;"
       >
         <!-- camera -->
         <a-entity class="avatar-head"
@@ -124,12 +93,12 @@
 
           <!-- These also do teleportaion for Blink controls in VR -->
           <!-- These are present for hand tracking but hands don't have joysticks so do nothing -->
-          <a-entity data-right="ray" mixin="blink" blink-controls="rotateOnTeleport:false;"></a-entity>
-          <a-entity data-left="ray" mixin="blink" blink-controls="rotateOnTeleport:false;"></a-entity>
+          <a-entity data-right="ray" mixin="blink"></a-entity>
+          <a-entity data-left="ray" mixin="blink"></a-entity>
 
           <!-- Use the finger tips for teleporting when the user points in VR with hand tracking -->
-          <a-entity data-right="index-finger-tip" mixin="blink" blink-controls="rotateOnTeleport:false;startEvents:pose_point_fuseShort;endEvents:pose_point_fuseLong;"></a-entity>
-          <a-entity data-left="index-finger-tip"  mixin="blink" blink-controls="rotateOnTeleport:false;startEvents:pose_point_fuseShort;endEvents:pose_point_fuseLong;"></a-entity>
+          <a-entity data-right="index-finger-tip" mixin="blink" blink-controls="startEvents:pose_point;cancelEvents:pose_cancel_point;endEvents:pose_point_fuseLong;"></a-entity>
+          <a-entity data-left="index-finger-tip"  mixin="blink" blink-controls="startEvents:pose_point;cancelEvents:pose_cancel_point;endEvents:pose_point_fuseLong;"></a-entity>
 
           <!-- These get drawn towards grabable objects, moving the whole hand and the attached elements-->
           <a-entity id="left-magnet" position="0 0.6 0" class="avatar-hand-left" data-left="grip"  data-magnet="magnet-left"  grab-magnet-target="startEvents:squeezestart,pose_fist;stopEvents:pose_flat_fuseShort,squeezeend;noMagnetEl:#left-no-magnet;"></a-entity>
@@ -144,7 +113,7 @@
       
       <a-light id="dirlight" shadow-camera-automatic=".navmesh" intensity="0.7" light="castShadow:true;type:directional" position="40 80 0"></a-light>
       <a-light type="hemisphere" ground-color="orange" color="blue" intensity="0.3"></a-light>
-      <a-circle shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6"></a-circle>
+      <a-circle hide-on-enter-ar shadow="cast:false" class="navmesh" rotation="-90 0 0" radius="6" material="shader:phong;color:paleblue;"></a-circle>
       <a-entity hide-on-enter-ar position="0 -0.2 0" environment="lighting:none;preset:yavapai;skyType:atmosphere;"></a-entity>
     </a-scene>
     

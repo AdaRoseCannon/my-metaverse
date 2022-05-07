@@ -17,6 +17,10 @@ AFRAME.registerComponent("update-gltf-model", {
 });
 
 AFRAME.registerComponent("networked-hand-toggle", {
+  schema: {},
+  init() {
+    this.lastCount = 0;
+  },
   tick () {
     const session = this.el.sceneEl.xrSession;
     let handCount = 0;
@@ -25,6 +29,10 @@ AFRAME.registerComponent("networked-hand-toggle", {
         handCount++;
       }
     }
+    if (this.lastCount === handCount) {
+      return;
+    }
+    this.lastCount = handCount;
     if (handCount >= 2) {
       // Probably some kind of hands so do set up networked
       if (this.isNetworkedWithHands !== true) {
